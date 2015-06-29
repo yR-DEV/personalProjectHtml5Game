@@ -4,3 +4,12 @@ canvas {
   left: 0px;
   background: transparent;
 }
+#backgroundCanvas {
+	z-index: -2;
+}
+#mainCanvas {
+	z-index: -1;
+}
+#bikeCanvas {
+	z-index: 0;
+}
