@@ -22,11 +22,13 @@ var imgDir = new function() {
   this.background = new Image();
   this.biker = new Image();
   this.uLock = new Image();
+  this.enemyCar = new Image();
+  this.enemyAmmo = new Image();
 
 
   //double checking to tell whether or not the images are present and loaded
   //I want to not run the game if there are images missing or broken.
-  var imgCount = 3;
+  var imgCount = 5;
   var imgLoaded = 0;
   //the function to check the number of loaded images.
   //the window will not initialize unless there are the correct # of imgs
@@ -42,11 +44,17 @@ var imgDir = new function() {
   //they will be passed to the above function, increasing the counter of the images loaded
   this.background.onload = function() {
     imageLoader();
-  }
+  };
   this.biker.onload = function() {
     imageLoader();
-  }
+  };
   this.uLock.onload = function() {
+    imageLoader();
+  };
+  this.enemyCar.onload = function() {
+    imageLoader();
+  }
+  this.enemyAmmo.onload = function() {
     imageLoader();
   }
 
@@ -55,7 +63,8 @@ var imgDir = new function() {
   this.background.src = "img/road.png";
   this.biker.src = "img/car.png";
   this.uLock.src = "img/bullets.png";
-
+  this.enemyCar.src = "img/car.png";
+  this.enemyAmmo.src = "img/bullets.png";
 };
 
 //creating a new "drawable object" which will be the base class/object
@@ -126,9 +135,11 @@ Background.prototype = new Drawable();
 
 //creating a ulock object which will contain all the data for the ulocks
 //that originate from the biker, they will be drawn on the focus canvas
-function ULock() {
+function ULock(object) {
   //if the bullet is live and drawn on the canvas then this will return true;
   this.alive = false;
+  //setting a variable to the object passed to this function
+  var self = object;
 
   //setting the bullet values
   //x,y and speed. Firty Rectangles too
@@ -144,12 +155,22 @@ function ULock() {
   this.draw = function() {
     this.context.clearRect(this.x, this.y, this.width, this.height);
     this.y -= this.speed;
+    //this mutilayers conditional checks to see if whatever is being drawn is
+    //the user's ammo or the enemy car's ammo
     if(this.y <= 0 - this.height) {
       return true;
+    } else if (self === "enemyAmmo" && this.y >= this.canvasHeight){
+      return true;
     } else {
-      this.context.drawImage(imgDir.uLock, this.x, this.y);
+      if(self === "uLock") {
+        this.context.drawImage(imgDir.uLock, this.x, this.y);
+      } else if (self === "enemyAmmo") {
+        this.context.drawImage(imgDir.enemyAmmo, this.x, this.y);
+      }
+      return false;
     }
   };
+
 
   //resetting the bullet values when they are cleared from the canvas
   this.clear = function() {
@@ -178,12 +199,26 @@ function ULockPool(maxLength) {
   var arrayPool = [];
 
   //populating the pool with the ulock object
-  this.init = function() {
+  this.init = function(object) {
     //setting a loop to go through the array of the number of bullets allowed on the canvas
-    for(var i = 0; i < arraySize; i++) {
-      var uLock = new ULock();
-      uLock.init(0,0, imgDir.uLock.width, imgDir.uLock.height);
-      arrayPool[i] = uLock;
+    if(object == "uLock") {
+      for(var i = 0; i < arraySize; i++) {
+        var uLock = new ULock("uLock");
+        uLock.init(0,0, imgDir.uLock.width, imgDir.uLock.height);
+        arrayPool[i] = uLock;
+      }
+    } else if (object == "enemyCar") {
+      for(var i = 0; i < arraySize; i++) {
+        var enemyCar = new EnemyCar();
+        enemyCar.init(0,0, imgDir.enemyCar.width, imgDir.enemyCar.height);
+        arrayPool[i] = enemyCar;
+      }
+    } else if(object == "enemyAmmo") {
+      for(var i = 0; i < arraySize; i++) {
+        var enemyAmmo = new ULock("enemyAmmo");
+        enemyAmmo.init(0,0, imgDir.enemyAmmo.width, imgDir.enemyAmmo.height);
+        arrayPool[i] = enemyAmmo;
+      }
     }
   };
 
@@ -197,11 +232,10 @@ function ULockPool(maxLength) {
   };
 
   this.getTwo = function(x1, y1, speed1, x2, y2, speed2) {
-    if(!arrayPool[arraySize - 1].alive &&
-       !arrayPool[arraySize - 2].alive) {
+    if(!arrayPool[arraySize - 1].alive && !arrayPool[arraySize - 2].alive) {
         this.get(x1, y1, speed1);
         this.get(x2, y2, speed2);
-       }
+    }
   };
 
   //drawing any bullets that are currently on the canvas
@@ -229,7 +263,9 @@ function Biker() {
   //setting default values, speeds, and pool size
   this.speed = 3;
   this.uLockPool = new ULockPool(35);
-  this.uLockPool.init();
+  this.uLockPool.init("uLock");
+  var throwRate = 15;
+  var counter = 0;
   //setting the firing rate and the counter of bullets
   var throwingRate = 15;
   var counter = 0;
@@ -292,6 +328,68 @@ function Biker() {
 //gotta set the biker as a new Drawable to inherit the characteristics from that object
 Biker.prototype = new Drawable();
 
+//creating an enemy car object
+function EnemyCar() {
+  var percentageOfFire = .05
+  var chance = 0;
+  this.alive = false;
+
+  //setting the values of the enemies
+  this.spawn = function(x, y, theSpeed) {
+    this.x = x;
+    this.y = y;
+    this.speed = theSpeed;
+    this.speedX = 0
+    this.speedY = theSpeed;
+    this.alive = true;
+    this.leftEdge = this.x - 90;
+    this.rightEdge = this.y + 90;
+    this.bottomEdge = this.y + 140;
+  };
+
+  //moving the drawn enemy
+  this.draw = function() {
+    this.context.clearRect(this.x - 1, this.y, this.width + 1, this.height);
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if (this.x <= this.leftEdge) {
+      this.speedX = this.speed;
+    } else if(this.x >= this.rightedge + this.width) {
+      this.speedX = -this.speed;
+    } else if(this.y >= this.bottomEdge) {
+      this.speed = 2;
+      this.speedY = 0;
+      this.y -= 5;
+      this.speedX = -this.speed;
+    }
+
+    this.context.drawImage(imgDir.enemyCar, this.x, this.y);
+
+    chance = Math.floor(Math.random() * 50);
+    if(chance / 25 < percentageOfFire) {
+      this.throw();
+    }
+  };
+
+  //fire an enemy bullet
+  this.throw = function() {
+    game.enemyAmmoPool.get(this.x + this.width / 2, this.y + this.height, -2.5);
+  }
+
+  //resetting the enemy values
+  this.clear = function() {
+    this.x = 0;
+    this.y = 0;
+    this.speed = 0;
+    this.speedX = 0;
+    this.speedY = 0;
+    this.alive = false;
+  }
+}
+//gotta draw the enemy
+EnemyCar.prototype = new Drawable();
+
+
 //creating the main game object.
 //It will contain all the data, objects, images, and whatnot
 function Game() {
@@ -318,6 +416,10 @@ function Game() {
       ULock.prototype.context = this.mainContext;
       ULock.prototype.canvasHeight = this.mainCanvas.height;
       ULock.prototype.canvasWidth = this.mainCanvas.width;
+      //initializing the enemies
+      EnemyCar.prototype.context = this.mainContext;
+      EnemyCar.prototype.canvasHeight = this.mainCanvas.height;
+      EnemyCar.prototype.canvasWidth = this.mainCanvas.width;
       //init on the background object, setting its draw point to cords (0,0)
       //this is basically calling on the init function in drawable object
       this.background = new Background();
@@ -328,6 +430,27 @@ function Game() {
       var bikerStartX = this.bikeCanvas.width / 2 - imgDir.biker.width;
       var bikerStartY = this.bikeCanvas.height / 4 * 4.25 - imgDir.biker.height * 2;
       this.biker.init(bikerStartX, bikerStartY, imgDir.biker.width, imgDir.biker.height);
+
+      //initializing the enemy pool object to hold enemy bullets
+      this.enemyPool = new ULockPool(1);
+      this.enemyPool.init("enemyCar");
+      var height = imgDir.enemyCar.height;
+      var width = imgDir.enemyCar.width;
+      var x = 200;
+      var y = -height;
+      var spacer = y * 1.5;
+			for(var i = 0; i <= 18; i++){
+				this.enemyPool.get(x, y, 2);
+				x += width + 25
+				if( i % 6 == 0) {
+					x = 100
+					y += spacer
+				}
+			}
+
+			this.enemyAmmoPool = new ULockPool(20);
+			this.enemyAmmoPool.init("enemyAmmo");
+
       //returns true because the biker was drawn
       return true;
     } else {
@@ -350,6 +473,8 @@ function animate() {
   game.background.draw();
   game.biker.move();
   game.biker.uLockPool.animate();
+	game.enemyPool.animate();
+	game.enemyAmmoPool.animate();
 }
 
 // //making an object of the key codes that will be recorded and mapped when
