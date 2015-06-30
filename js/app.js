@@ -71,7 +71,7 @@ var imgDir = new function() {
   this.background.src = "img/road.png";
   this.biker.src = "img/car.png";
   this.uLock.src = "img/bullets.png";
-	this.enemy1.src = "img/car2.png";
+	this.enemy1.src = "img/enemy.png";
 
 };
 
