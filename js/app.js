@@ -262,8 +262,10 @@ function Biker() {
       } else if(KEY_STATUS.up) {
         this.y -= this.speed;
         //setting limits on how far foward the bike can go on the screen
-        if(this.y >= this.canvasHeight +500) {
-          this.y = this.canvasHeight +500;
+        if(this.y >= this.height) {
+          this.y = this.canvasHeight - this.height;
+        } else if (this.y <= 0) {
+          this.y = 0 + this.height;
         }
       } else if(KEY_STATUS.down) {
         this.y += this.speed;
