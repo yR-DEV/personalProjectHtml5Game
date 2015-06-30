@@ -22,11 +22,15 @@ var imgDir = new function() {
   this.background = new Image();
   this.biker = new Image();
   this.uLock = new Image();
+	this.enemy1 = new Image();
+	// this.enemy2 = new Image();
+	// this.enemy3 = new Image();
+	// this.enemy4 = new Image();
 
 
   //double checking to tell whether or not the images are present and loaded
   //I want to not run the game if there are images missing or broken.
-  var imgCount = 3;
+  var imgCount = 4;
   var imgLoaded = 0;
   //the function to check the number of loaded images.
   //the window will not initialize unless there are the correct # of imgs
@@ -49,12 +53,25 @@ var imgDir = new function() {
   this.uLock.onload = function() {
     imageLoader();
   }
+	this.enemy1.onload = function() {
+		imageLoader();
+	}
+	// this.enemy2.onload = function() {
+	// 	imageLoader();
+	// }
+	// this.enemy3.onload = function() {
+	// 	imageLoader();
+	// }
+	// this.enemy4.onload = function() {
+	// 	imageLoader();
+	// }
 
 
   //setting the image source
   this.background.src = "img/road.png";
   this.biker.src = "img/car.png";
   this.uLock.src = "img/bullets.png";
+	this.enemy1.src = "img/car2.png";
 
 };
 
@@ -290,6 +307,30 @@ function Biker() {
 //gotta set the biker as a new Drawable to inherit the characteristics from that object
 Biker.prototype = new Drawable();
 
+function Enemy1() {
+	this.alive = false;
+
+	this.spawn = function(x, y, lockSpeed) {
+    this.x = x;
+    this.y = y;
+    this.speed = lockSpeed;
+    this.alive = true;
+  };
+
+	this.draw = function() {
+    this.context.clearRect(this.x, this.y, this.width, this.height);
+    this.y -= this.speed;
+    if(this.y <= 0 - this.height) {
+      return true;
+    } else {
+			//this is where it is drawn. DRAWIMAGE FOR GODS SAKE.
+      this.context.drawImage(imgDir.enemy1, 0, 200);
+    }
+  };
+}
+
+Enemy1.prototype = new Drawable();
+
 //creating the main game object.
 //It will contain all the data, objects, images, and whatnot
 function Game() {
@@ -316,17 +357,25 @@ function Game() {
       ULock.prototype.context = this.mainContext;
       ULock.prototype.canvasHeight = this.mainCanvas.height;
       ULock.prototype.canvasWidth = this.mainCanvas.width;
+
+			Enemy1.prototype.context = this.mainContext;
+      Enemy1.prototype.canvasHeight = this.mainCanvas.height;
+      Enemy1.prototype.canvasWidth = this.mainCanvas.width;
       //init on the background object, setting its draw point to cords (0,0)
       //this is basically calling on the init function in drawable object
       this.background = new Background();
       this.background.init(0, 0);  //draw point is at x = 0 and y = 0;
       //need to initialize the Biker Object now
       this.biker = new Biker();
+			this.enemy1 = new Enemy1();
       //setting the biker to start at the bottom middle of the screen
       var bikerStartX = this.bikeCanvas.width / 2 - imgDir.biker.width;
       var bikerStartY = this.bikeCanvas.height / 4 * 4.25 - imgDir.biker.height * 2;
       this.biker.init(bikerStartX, bikerStartY, imgDir.biker.width, imgDir.biker.height);
-      //returns true because the biker was drawn
+
+			this.enemy1.init(0, 0, imgDir.enemy1.width, imgDir.enemy1.height);
+
+		  //returns true because the biker was drawn
       return true;
     } else {
       return false;
@@ -337,6 +386,7 @@ function Game() {
   this.start = function() {
     //drawing the biker...
     this.biker.draw();
+		this.enemy1.draw();
     animate();
   };
 }
