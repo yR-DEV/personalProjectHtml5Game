@@ -167,12 +167,13 @@ function ULock(object) {
   this.draw = function() {
     this.context.clearRect(this.x - 1, this.y - 1, this.width + 1, this.height + 1);
     this.y -= this.speed;
-		if(theObject === "uLock" && this.y <= 0 - this.height) {
+		if(theObject == "uLock" && this.y <= 0 - this.height) {
+			this.context.drawImage(imgDir.uLock, this.x, this.y)
 			return true;
-		} else if (theObject === "enemyAmmo" && this.y >= this.canvasHeight) {
+		} else if (theObject == "enemyAmmo" && this.y >= this.canvasHeight) {
 			return true;
 		} else {
-			if(theObject === "bullet") {
+			if(theObject === "uLock") {
 				this.context.drawImage(imgDir.uLock, this.x, this.y);
 			} else if(theObject === "enemyAmmo") {
 				this.context.drawImage(imgDir.enemyAmmo, this.x,this.y);
@@ -211,9 +212,10 @@ function ULockPool(maxLength) {
 
   //populating the pool with the ulock object
   this.init = function(object) {
+		var theObject = object;
     //setting a loop to go through the array of the number of bullets allowed on the canvas
     //also the contitional will detect which object was passed to the init in here
-		if(object == "uLock") {
+		if(theObject == "uLock") {
 			for(var i = 0; i < arraySize; i++){
 				//starting a new instance of the uLock object
 				var uLock = new ULock("uLock");
@@ -222,13 +224,13 @@ function ULockPool(maxLength) {
 			}
 			//I may be able to make enemies move accross the screen here, just have to mess with the
 			//child instances of enemy...
-		} else if(object == "enemy1") {
+		} else if(theObject == "enemy1") {
 			for(var i = 0; i < arraySize; i++) {
 				var enemy1 = new Enemy1();
 				enemy1.init(0,0, imgDir.enemy1.width, imgDir.enemy1.height);
 				arrayPool[i] = enemy1;
 			}
-		} else if(object == "enemyAmmo") {
+		} else if(theObject == "enemyAmmo") {
 			for(var i = 0; i < arraySize; i++) {
 				var enemyAmmo = new ULock("enemyAmmo")
 				enemyAmmo.init(0,0, imgDir.enemyAmmo.width, imgDir.enemyAmmo.height);
@@ -278,10 +280,10 @@ function ULockPool(maxLength) {
 function Biker() {
   //setting default values, speeds, and pool size
   this.speed = 3;
-  this.uLockPool = new ULockPool(35);
+  this.uLockPool = new ULockPool(40);
   this.uLockPool.init("uLock");
   //setting the firing rate and the counter of bullets
-  var throwingRate = 10;
+  var throwingRate = 15;
   var counter = 0;
   //gotta draw the bike on the canvas
   this.draw = function() {
@@ -329,6 +331,7 @@ function Biker() {
 
     if(KEY_STATUS.space && counter >= throwingRate) {
       this.throw();
+			// console.log("HAYYYY SPACE REGISTERING");
       counter = 0;
     }
   };
