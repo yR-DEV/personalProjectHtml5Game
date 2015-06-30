@@ -24,6 +24,7 @@ var imgDir = new function() {
   this.uLock = new Image();
   this.enemyCar = new Image();
   this.enemyAmmo = new Image();
+	this.enemyCar2 = new Image();
 
 
   //double checking to tell whether or not the images are present and loaded
@@ -57,6 +58,9 @@ var imgDir = new function() {
   this.enemyAmmo.onload = function() {
     imageLoader();
   }
+	this.enemyCar2.onload = function() {
+		imageLoader();
+	}
 
 
   //setting the image source
@@ -65,6 +69,7 @@ var imgDir = new function() {
   this.uLock.src = "img/bullets.png";
   this.enemyCar.src = "img/car.png";
   this.enemyAmmo.src = "img/bullets.png";
+	this.enemyCar2.src = "img/car2.png";
 };
 
 //creating a new "drawable object" which will be the base class/object
@@ -328,9 +333,10 @@ function Biker() {
 //gotta set the biker as a new Drawable to inherit the characteristics from that object
 Biker.prototype = new Drawable();
 
+
 //creating an enemy car object
 function EnemyCar() {
-  var percentageOfFire = .05
+  var percentageOfFire = .05;
   var chance = 0;
   this.alive = false;
 
@@ -339,7 +345,7 @@ function EnemyCar() {
     this.x = x;
     this.y = y;
     this.speed = theSpeed;
-    this.speedX = 0
+    this.speedX = 0;
     this.speedY = theSpeed;
     this.alive = true;
     this.leftEdge = this.x - 90;
@@ -349,7 +355,7 @@ function EnemyCar() {
 
   //moving the drawn enemy
   this.draw = function() {
-    this.context.clearRect(this.x - 1, this.y, this.width + 1, this.height);
+    this.context.clearRect(this.x -1, this.y, this.width + 1, this.height);
     this.x += this.speedX;
     this.y += this.speedY;
     if (this.x <= this.leftEdge) {
@@ -357,7 +363,7 @@ function EnemyCar() {
     } else if(this.x >= this.rightedge + this.width) {
       this.speedX = -this.speed;
     } else if(this.y >= this.bottomEdge) {
-      this.speed = 2;
+      this.speed = 1.5;
       this.speedY = 0;
       this.y -= 5;
       this.speedX = -this.speed;
@@ -365,8 +371,8 @@ function EnemyCar() {
 
     this.context.drawImage(imgDir.enemyCar, this.x, this.y);
 
-    chance = Math.floor(Math.random() * 50);
-    if(chance / 25 < percentageOfFire) {
+    chance = Math.floor(Math.random() * 101);
+    if(chance / 100 < percentageOfFire) {
       this.throw();
     }
   };
@@ -420,6 +426,7 @@ function Game() {
       EnemyCar.prototype.context = this.mainContext;
       EnemyCar.prototype.canvasHeight = this.mainCanvas.height;
       EnemyCar.prototype.canvasWidth = this.mainCanvas.width;
+
       //init on the background object, setting its draw point to cords (0,0)
       //this is basically calling on the init function in drawable object
       this.background = new Background();
@@ -436,7 +443,7 @@ function Game() {
       this.enemyPool.init("enemyCar");
       var height = imgDir.enemyCar.height;
       var width = imgDir.enemyCar.width;
-      var x = 200;
+      var x = 100;
       var y = -height;
       var spacer = y * 1.5;
 			for(var i = 0; i <= 18; i++){
