@@ -310,21 +310,27 @@ Biker.prototype = new Drawable();
 function Enemy1() {
 	this.alive = false;
 
-	this.spawn = function(x, y, lockSpeed) {
-    this.x = x;
-    this.y = y;
-    this.speed = lockSpeed;
-    this.alive = true;
+	this.spawn = function(x, y, theSpeed) {
+		this.x = x;
+		this.y = y;
+		this.speed = theSpeed;
+		this.speedX = 0;
+		this.speedY = theSpeed;
+		this.alive = true;
+		this.leftEdge = this.x - 90;
+		this.rightEdge = this.x + 90;
+		this.bottomEdge = this.y + 140;
   };
 
 	this.draw = function() {
-    this.context.clearRect(this.x, this.y, this.width, this.height);
-    this.y -= this.speed;
+    this.context.clearRect(this.x-1, this.y, this.width+1, this.height);
+    this.y += this.speedY;
+		this.x += this.speedX;
     if(this.y <= 0 - this.height) {
       return true;
     } else {
 			//this is where it is drawn. DRAWIMAGE FOR GODS SAKE.
-      this.context.drawImage(imgDir.enemy1, 0, 200);
+      this.context.drawImage(imgDir.enemy1, 200, 200);
     }
   };
 }
