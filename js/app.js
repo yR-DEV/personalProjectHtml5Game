@@ -515,7 +515,7 @@ function Biker() {
 Biker.prototype = new Drawable();
 
 function Enemy1() {
-	var percentChanceToFire = 0.01;
+	var percentChanceToFire = 2;
 	var chance = 0;
 	this.collidingBool = false;
 	this.collidesWith = "uLock";
@@ -555,8 +555,9 @@ function Enemy1() {
 		if(!this.collidingBool) {
 			this.context.drawImage(imgDir.enemy1, this.x, this.y);
 			//giving the enemies achance to fire a weapon
-			var chance = Math.floor(Math.random() * 101);
-			if(chance / 100 < percentChanceToFire) {
+			var chance = Math.floor(Math.random() * 10);
+			console.log(chance);
+			if(chance / 5 < percentChanceToFire) {
 				this.throw();
 			}
 			return false;
