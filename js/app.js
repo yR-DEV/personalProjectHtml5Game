@@ -17,7 +17,7 @@ function init() {
 var imgDir = new function() {
   //defining the images and declaring the key empty to be null
   //because it isn't empty xD
-  this.empty = null;
+  // this.empty = null;
   //setting background to a new image
   this.background = new Image();
   this.biker = new Image();
@@ -60,15 +60,6 @@ var imgDir = new function() {
 	this.enemyAmmo.onload =function() {
 		imageLoader();
 	}
-	// this.enemy2.onload = function() {
-	// 	imageLoader();
-	// }
-	// this.enemy3.onload = function() {
-	// 	imageLoader();
-	// }
-	// this.enemy4.onload = function() {
-	// 	imageLoader();
-	// }
 
 
   //setting the image source
@@ -99,9 +90,11 @@ function Drawable() {
   //if I dont like these or dont want 0 for all 3in the future
   //simply redefining the values in the child object will overwrite them
   this.speed = 0;
+	this.collidesWith = "";
   this.canvasHeight = 0;
   this.canvasWidth = 0;
-
+	this.collidingBool = false;
+	this.type = ""
   //abstract function to be called on from other objects and gives access to the
   //properties listed in here
   this.draw = function() {
@@ -113,6 +106,11 @@ function Drawable() {
     //this will be left blank and will be called on in other objects to inherit
     //their properties
   };
+	//checking to see if one object is collidable with another.
+	//returns true or false
+	this.canCollideWith = function(object) {
+		return (this.collidesWith === object.type);
+	};
 }
 
 //creating a background object that will inherit traits from drawable object
@@ -147,7 +145,7 @@ Background.prototype = new Drawable();
 
 //creating a ulock object which will contain all the data for the ulocks
 //that originate from the biker, they will be drawn on the focus canvas
-function ULock(object) {
+function Ammo(object) {
   //if the bullet is live and drawn on the canvas then this will return true;
   this.alive = false;
 	//creating a variable to hold the object that is passed to thefunction
@@ -167,16 +165,18 @@ function ULock(object) {
   this.draw = function() {
     this.context.clearRect(this.x - 1, this.y - 1, this.width + 1, this.height + 1);
     this.y -= this.speed;
-		if(theObject == "uLock" && this.y <= 0 - this.height) {
-			this.context.drawImage(imgDir.uLock, this.x, this.y)
+
+		if(this.collidingBool) {
 			return true;
-		} else if (theObject == "enemyAmmo" && this.y >= this.canvasHeight) {
+		} else if((theObject === "uLock") && (this.y <= 0 - this.height)) {
+			return true;
+		} else if ((theObject === "enemyAmmo") && (this.y >= this.canvasHeight)) {
 			return true;
 		} else {
 			if(theObject === "uLock") {
 				this.context.drawImage(imgDir.uLock, this.x, this.y);
-			} else if(theObject === "enemyAmmo") {
-				this.context.drawImage(imgDir.enemyAmmo, this.x,this.y);
+			} else if (theObject === "enemyAmmo"){
+				this.context.drawImage(imgDir.enemyAmmo, this.x, this.y);
 			}
 			return false;
 		}
@@ -188,13 +188,165 @@ function ULock(object) {
     this.y = 0;
     this.speed = 0;
     this.alive = false;
+		//if clearing the object, double checking that boolean is set to false;
+		this.collidingBool = false;
   };
 }
 
 // //gotta call on the drawable object and draw the bullets
 // //the bullets will inherit the drawable object's properties
 // //unless they are overwritten
-ULock.prototype = new Drawable();
+Ammo.prototype = new Drawable();
+
+function FourSquare(boxBoundry, lvl) {
+	var maxObjNum = 10;
+	this.bounds = boxBoundry || {
+		x: 0,
+		y: 0,
+		width: 0,
+		height: 0,
+	};
+	var objectArr = [];
+	this.nodeArr = [];
+	var level = lvl || 0;
+	var totalLevels = 5;
+
+	//before we do anything with the four squares, we need to make sure
+	//that it is empty
+	this.clear = function() {
+		objectArr = [];
+		for(var i = 0; i < this.nodeArr.length; i++) {
+			this.nodeArr[i].clear();
+		}
+		this.nodeArr = [];
+	};
+
+	this.gatherAllObjects = function(objectsReturned) {
+		//this self calling function's first loop will run through every object
+		//every array of objects and objects of arrays and deep and whatnot
+		for(var i = 0; i < this.nodeArr.length; i++) {
+			this.nodeArr[i].gatherAllObjects(objectsReturned);
+		}
+
+		//as the loop runs that length value I think (?) will change,
+		//so by defining the value at the start of the loop, it stays dynamic
+		for(var x = 0, length = objectArr.length; x < length; x++) {
+			objectsReturned.push(objectArr[x]);
+		}
+
+		return objectsReturned;
+	};
+
+	//returning all the objects that the that can collide with obj
+	this.findTheObjects = function(objectsReturned, object) {
+		if(typeof object === "undefined") {
+			console.log("undefined object...");
+			return;
+		}
+		var theIndex = this.getTheIndex(object);
+		if(theIndex != -1 && this.nodeArr.length) {
+			this.nodeArr[theIndex].findTheObjects(objectsReturned, object);
+		}
+		for(var i = 0, theL = objectArr.length; i < theL; i++) {
+			objectsReturned.push(objectArr[i]);
+		}
+
+	return objectsReturned;
+	};
+
+	//now that we have all the objects ever, lets put them into the forsquares
+	//if it gets too crowded, it will split and add all objects to their corresponding nodearr positions
+	this.insert = function(object) {
+		if(typeof object === "undefined") {
+			//console.log("UNDEFINED BOO");
+			return;
+		}
+		if(object instanceof Array) {
+			for(var i = 0, length = object.length; i < length; i++) {
+				this.insert(object[i]);
+			}
+			return;
+		}
+		if(this.nodeArr.length) {
+			var theIndex = this.getTheIndex(object);
+			if(theIndex != -1) {
+				this.nodeArr[theIndex].insert(object);
+				return;
+			}
+		}
+		objectArr.push(object);
+
+		//prevents infinite splitting when 4sq reaches capacity
+		if((objectArr.length > maxObjNum) && (level < totalLevels)) {
+			if(this.nodeArr[0] == null) {
+				this.split();
+			}
+			var x = 0
+			while(x < objectArr.length) {
+				var theIndex = this.getTheIndex(objectArr[x]);
+				if(theIndex != -1) {
+					this.nodeArr[theIndex].insert((objectArr.splice(i, 1))[0])
+				} else {
+					x++;
+				}
+			}
+		}
+	};
+	//function to check which node the object is in
+	this.getTheIndex = function(object) {
+		var theIndex = -1;
+		var vMid = this.bounds.x + this.bounds.width / 2;
+		var hMid = this.bounds.y + this.bounds.height / 2;
+		var topQ = ((object.y < hMid) && (object.y + object.height < hMid));
+		var botQ = (object.y > hMid);
+
+		if((object.x < vMid) && (object.x + object.width < vMid)) {
+			if(topQ) {
+				theIndex = 1;
+			} else if (botQ) {
+				theIndex = 2;
+			}
+		//these objects can git in the right squares
+		} else if (object.x > vMid) {
+			theIndex = 3;
+		}
+		return theIndex;
+	}
+
+	//splitting the node into 4 subnodes
+	this.split = function() {
+		var theSubWidth = (this.bounds.width / 2) | 0;
+		var theSubHeight = (this.bounds.height / 2) | 0;
+
+		this.nodeArr[0] = new FourSquare({
+			x: this.bounds.x + theSubWidth,
+			y: this.bounds.y ,
+			width: theSubWidth,
+			height: theSubHeight
+		}, level + 1);
+		this.nodeArr[1] = new FourSquare({
+			x: this.bounds.x,
+			y: this.bounds.y,
+			width: theSubWidth,
+			height: theSubHeight
+		}, level + 1);
+		this.nodeArr[2] = new FourSquare({
+			x: this.bounds.x,
+			y: this.bounds.y + theSubHeight,
+			width: theSubWidth,
+			height: theSubHeight
+		}, level + 1);
+		this.nodeArr[3] = new FourSquare({
+			x: this.bounds.x + theSubWidth,
+			y: this.bounds.y + theSubHeight,
+			width: theSubWidth,
+			height: theSubHeight
+		}, level + 1);
+	}
+};
+
+
+
 
 //creating an object that will hold all the bullets on the canvas and get rid of them
 //when needed. The pool populates an array with bullet objects,
@@ -205,35 +357,49 @@ ULock.prototype = new Drawable();
 //if draw function returns true then it is time to remove item from the array and push it to the back
 //this was a bad name since this array pool will exist in separate instances as
 //a function for enemy bullets, enemies, and user bullets
-function ULockPool(maxLength) {
+function ThePools(maxLength) {
   //This is the maximum number of bullets allowed on the canvas and in the array
   var arraySize = maxLength;
   var arrayPool = [];
 
+	this.getThePool = function() {
+		var object = [];
+		for(var i = 0; i < arraySize; i++){
+			if(arrayPool[i].alive) {
+				object.push(arrayPool[i]);
+			}
+		}
+		return object;
+	}
+
   //populating the pool with the ulock object
   this.init = function(object) {
-		var theObject = object;
+		// var theObject = object;
     //setting a loop to go through the array of the number of bullets allowed on the canvas
     //also the contitional will detect which object was passed to the init in here
-		if(theObject == "uLock") {
+		if(object == "uLock") {
 			for(var i = 0; i < arraySize; i++){
 				//starting a new instance of the uLock object
-				var uLock = new ULock("uLock");
+				var uLock = new Ammo("uLock");
 				uLock.init(0,0, imgDir.uLock.width, imgDir.uLock.height);
+				uLock.collidesWith = "enemy1";
+				uLock.type = "bullet";
 				arrayPool[i] = uLock;
 			}
 			//I may be able to make enemies move accross the screen here, just have to mess with the
 			//child instances of enemy...
-		} else if(theObject == "enemy1") {
+		} else if(object == "enemy1") {
 			for(var i = 0; i < arraySize; i++) {
 				var enemy1 = new Enemy1();
 				enemy1.init(0,0, imgDir.enemy1.width, imgDir.enemy1.height);
 				arrayPool[i] = enemy1;
 			}
-		} else if(theObject == "enemyAmmo") {
+		} else if(object == "enemyAmmo") {
 			for(var i = 0; i < arraySize; i++) {
-				var enemyAmmo = new ULock("enemyAmmo")
+				var enemyAmmo = new Ammo("enemyAmmo")
 				enemyAmmo.init(0,0, imgDir.enemyAmmo.width, imgDir.enemyAmmo.height);
+				enemyAmmo.collidesWith = "biker";
+				enemyAmmo.type = "enemyAmmo";
 				arrayPool[i] = enemyAmmo;
 			}
 		}
@@ -248,11 +414,9 @@ function ULockPool(maxLength) {
     }
   };
 
-  this.getTwo = function(x1, y1, speed1, x2, y2, speed2) {
-    if(!arrayPool[arraySize - 1].alive &&
-       !arrayPool[arraySize - 2].alive) {
-        this.get(x1, y1, speed1);
-        this.get(x2, y2, speed2);
+  this.uLockGet = function(x, y, speed) {
+    if(!arrayPool[arraySize - 1].alive) {
+        this.get(x, y, speed);
        }
   };
 
@@ -280,11 +444,14 @@ function ULockPool(maxLength) {
 function Biker() {
   //setting default values, speeds, and pool size
   this.speed = 3;
-  this.uLockPool = new ULockPool(40);
+  this.uLockPool = new ThePools(30);
   this.uLockPool.init("uLock");
   //setting the firing rate and the counter of bullets
   var throwingRate = 15;
   var counter = 0;
+	//collision setting
+	this.collidesWith = "enemyAmmo";
+	this.type = "biker";
   //gotta draw the bike on the canvas
   this.draw = function() {
     this.context.drawImage(imgDir.biker, this.x, this.y);
@@ -314,7 +481,8 @@ function Biker() {
       } else if(KEY_STATUS.up) {
         this.y -= this.speed;
         //setting limits on how far foward the bike can go on the screen
-        if(this.y >= this.canvasHeight +500) {
+      	//I need to mess with this
+			  if(this.y >= this.canvasHeight +500) {
           this.y = this.canvasHeight +500;
         }
       } else if(KEY_STATUS.down) {
@@ -326,10 +494,13 @@ function Biker() {
         }
       }
       //finish this be redrawing the biker!
-      this.draw();
-    }
+			//after making sure that he has not been hit by a milkshake
+			if(!this.collidingBool) {
+      	this.draw();
+    	}
+		}
 
-    if(KEY_STATUS.space && counter >= throwingRate) {
+    if((KEY_STATUS.space && counter >= throwingRate) && (!this.collidingBool)) {
       this.throw();
 			// console.log("HAYYYY SPACE REGISTERING");
       counter = 0;
@@ -337,16 +508,18 @@ function Biker() {
   };
 
   this.throw = function() {
-    this.uLockPool.getTwo(this.x + 6, this.y, 3, this.x + 32, this.y, 3);
+    this.uLockPool.uLockGet(this.x + 45, this.y, 3);
   };
 }
 //gotta set the biker as a new Drawable to inherit the characteristics from that object
 Biker.prototype = new Drawable();
 
 function Enemy1() {
-	this.alive = false;
 	var percentChanceToFire = 0.01;
 	var chance = 0;
+	this.collidingBool = false;
+	this.collidesWith = "uLock";
+	this.type = "enemy1";
 
 	this.spawn = function(x, y, theSpeed) {
 		this.x = x;
@@ -378,12 +551,17 @@ function Enemy1() {
 			this.y -= 5;
 			this.speedX = -this.speed;
 		}
-		this.context.drawImage(imgDir.enemy1, this.x, this.y);
 
-		//giving the enemies achance to fire a weapon
-		var chance = Math.floor(Math.random() * 101);
-		if(chance / 100 < percentChanceToFire) {
-			this.throw();
+		if(!this.collidingBool) {
+			this.context.drawImage(imgDir.enemy1, this.x, this.y);
+			//giving the enemies achance to fire a weapon
+			var chance = Math.floor(Math.random() * 101);
+			if(chance / 100 < percentChanceToFire) {
+				this.throw();
+			}
+			return false;
+		}	else {
+			return true;
 		}
   };
 
@@ -399,6 +577,7 @@ function Enemy1() {
 		this.speedX = 0;
 		this.speedY = 0;
 		this.alive = false;
+		this.collidingBool = false;
 	}
 }
 
@@ -427,9 +606,9 @@ function Game() {
       Biker.prototype.canvasHeight = this.bikeCanvas.height;
       Biker.prototype.canvasWidth = this.bikeCanvas.width;
       //initializing the main canvas
-      ULock.prototype.context = this.mainContext;
-      ULock.prototype.canvasHeight = this.mainCanvas.height;
-      ULock.prototype.canvasWidth = this.mainCanvas.width;
+      Ammo.prototype.context = this.mainContext;
+      Ammo.prototype.canvasHeight = this.mainCanvas.height;
+      Ammo.prototype.canvasWidth = this.mainCanvas.width;
 
 			Enemy1.prototype.context = this.mainContext;
       Enemy1.prototype.canvasHeight = this.mainCanvas.height;
@@ -440,7 +619,7 @@ function Game() {
       this.background.init(0, 0);  //draw point is at x = 0 and y = 0;
       //need to initialize the Biker and enemy Objects now
       this.biker = new Biker();
-			this.enemy1 = new Enemy1();
+			// this.enemy1 = new Enemy1();
       //setting the biker to start at the bottom middle of the screen
       var bikerStartX = this.bikeCanvas.width / 2 - imgDir.biker.width;
       var bikerStartY = this.bikeCanvas.height / 4 * 4.25 - imgDir.biker.height * 2;
@@ -448,7 +627,7 @@ function Game() {
 
 			//starting a arraypool for the enemy bullets
 			//the fn that does this was cleverly named ULockPool cuz im awesome
-			this.enemySpawnPool = new ULockPool(30);
+			this.enemySpawnPool = new ThePools(30);
 			this.enemySpawnPool.init("enemy1");
 			var height = imgDir.enemy1.height;
 			var width = imgDir.enemy1.width;
@@ -468,9 +647,16 @@ function Game() {
 			}
 
 			//initializing a ULockPool instance for the enemy bullets
-			this.enemyAmmoArrPool = new ULockPool(40);
+			this.enemyAmmoArrPool = new ThePools(30);
 			this.enemyAmmoArrPool.init("enemyAmmo");
 
+			//starting FourSquare
+			this.fourSquare = new FourSquare({
+				x: 0,
+				y: 0,
+				width: this.mainCanvas.width,
+				height: this.mainCanvas.height
+			});
 		  //returns true because the biker was drawn
       return true;
     } else {
@@ -490,13 +676,44 @@ function Game() {
 //creating the animation loop, calling on the requestAnimationFrame from the API
 //by a front end developer named Paul Irish and is what the above this.start calls on
 function animate() {
-  requestAnimFrame( animate );
+  game.fourSquare.clear();
+	game.fourSquare.insert(game.biker);
+	game.fourSquare.insert(game.biker.uLockPool.getThePool());
+	game.fourSquare.insert(game.enemySpawnPool.getThePool());
+	game.fourSquare.insert(game.enemyAmmoArrPool.getThePool());
+
+	detectCollision();
+
+	requestAnimFrame( animate );
   game.background.draw();
   game.biker.move();
   game.biker.uLockPool.animate();
 	game.enemySpawnPool.animate();
 	game.enemyAmmoArrPool.animate();
 }
+
+function detectCollision() {
+	var objects = [];
+	game.fourSquare.gatherAllObjects(objects);
+
+	for (var x = 0, len = objects.length; x < len; x++) {
+		game.fourSquare.findTheObjects(obj = [], objects[x]);
+
+		for (y = 0, length = obj.length; y < length; y++) {
+
+			// DETECT COLLISION ALGORITHM
+			if (objects[x].collidesWith === obj[y].type &&
+				(objects[x].x < obj[y].x + obj[y].width &&
+			     objects[x].x + objects[x].width > obj[y].x &&
+				 objects[x].y < obj[y].y + obj[y].height &&
+				 objects[x].y + objects[x].height > obj[y].y)) {
+				objects[x].collidingBool = true;
+				obj[y].collidingBool = true;
+				console.log('hit');
+			}
+		}
+	}
+};
 
 // //making an object of the key codes that will be recorded and mapped when
 // //the user presses a valid key
