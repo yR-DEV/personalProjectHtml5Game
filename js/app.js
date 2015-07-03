@@ -7,8 +7,7 @@
 var game = new Game();
 
 function init() {
-	if(game.init())
-		game.start();
+	game.init();
 }
 
 //creating an image object, this will house all of the images in the img folder
