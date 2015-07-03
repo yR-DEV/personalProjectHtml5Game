@@ -308,7 +308,11 @@ function FourSquare(boxBoundry, lvl) {
 			}
 		//these objects can git in the right squares
 		} else if (object.x > vMid) {
+			if(topQ) {
+				theIndex = 0;
+			} else if (botQ){
 			theIndex = 3;
+			}
 		}
 		return theIndex;
 	}
@@ -515,7 +519,7 @@ function Biker() {
 Biker.prototype = new Drawable();
 
 function Enemy1() {
-	var percentChanceToFire = 2;
+	var percentChanceToFire = 1;
 	var chance = 0;
 	this.collidingBool = false;
 	this.collidesWith = "uLock";
@@ -555,9 +559,9 @@ function Enemy1() {
 		if(!this.collidingBool) {
 			this.context.drawImage(imgDir.enemy1, this.x, this.y);
 			//giving the enemies achance to fire a weapon
-			var chance = Math.floor(Math.random() * 10);
-			console.log(chance);
-			if(chance / 5 < percentChanceToFire) {
+			var chance = Math.floor(Math.random() * 6);
+			// console.log(chance);
+			if(chance / 8 < percentChanceToFire) {
 				this.throw();
 			}
 			return false;
