@@ -448,7 +448,7 @@ function ThePools(maxLength) {
 //with the user input
 function Biker() {
   //setting default values, speeds, and pool size
-  this.speed = 3;
+  this.speed = 4;
   this.uLockPool = new ThePools(30);
   this.uLockPool.init("uLock");
   //setting the firing rate and the counter of bullets
@@ -684,33 +684,14 @@ function Game() {
   this.start = function() {
     //drawing the biker...
     this.biker.draw();
+		document.getElementById('score-and-level').style.display = "block";
 		//if I want single instances of enemies this is where I will call on draw
     animate();
   };
 
 	this.restart = function() {
-		// console.log('restart function check');
 		document.getElementById('yew-luze').style.display = "none";
-		this.backgroundContext.clearRect(0, 0, this.backgroundCanvas.width, this.backgroundCanvas.length);
-		this.bikeContext.clearRect(0, 0, this.bikeCanvas.width, this.bikeCanvas.height);
-		this.mainContext.clearRect(0, 0, this.mainCanvas.width, this.mainCanvas.height);
-		this.fourSquare.clear();
-
-		this.background.init(0, 0);
-		// var bikerStartX = this.bikeCanvas.width / 2 - imgDir.biker.width;
-		// var bikerStartY = this.bikeCanvas.height / 4 * 4.25 - imgDir.biker.height * 2;
-		this.biker.init(bikerStartX, bikerStartY, imgDir.biker.width, imgDir.biker.height);
-
-
-		this.enemySpawnPool.init("enemy1");
-		this.enemySpawnWave();
-		this.enemyAmmoArrPool.init("enemyAmmo");
-
-		this.playerScore = 0;
-		this.playerLevel = 1;
-
-		this.start();
-	};
+	}
 
 	this.gameOver = function() {
 		document.getElementById('yew-luze').style.display = "block";
@@ -722,7 +703,7 @@ function checkGameReadyState(){
 	if(game.checkState) {
 		window.clearInterval(game.checkState);
 		game.start();
-	}	
+	}
 }
 //this function, commented out right now, will be used to check to make sure
 //that all the audio files have loaded before starting the game
