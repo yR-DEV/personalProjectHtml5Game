@@ -502,7 +502,10 @@ function Biker() {
 			//after making sure that he has not been hit by a milkshake
 			if(!this.collidingBool) {
       	this.draw();
-    	}
+    	} else {
+				this.alive = false;
+				game.gameOver();
+			}
 		}
 
     if((KEY_STATUS.space && counter >= throwingRate) && (!this.collidingBool)) {
@@ -630,7 +633,7 @@ function Game() {
       //need to initialize the Biker and enemy Objects now
       this.biker = new Biker();
 			this.playerScore = 0;
-			this.playerLevel = 0;
+			this.playerLevel = 1;
 			// this.enemy1 = new Enemy1();
       //setting the biker to start at the bottom middle of the screen
       var bikerStartX = this.bikeCanvas.width / 2 - imgDir.biker.width;
@@ -682,6 +685,11 @@ function Game() {
 		//if I want single instances of enemies this is where I will call on draw
     animate();
   };
+
+	this.gameOver = function() {
+		document.getElementById('yew-luze').style.display = "block";
+		document.getElementById('score-and-level').style.display = "none";
+	}
 }
 //this function, commented out right now, will be used to check to make sure
 //that all the audio files have loaded before starting the game

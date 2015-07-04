@@ -40,3 +40,25 @@ span .level {
   cursor: default;
   font-size: 30px;
 }
+
+.yew-luze {
+  position: absolute;
+	top: 100px;
+	left: 170px;
+	color: red;
+	font-family: Helvetica;
+	font-size: 50px;
+	cursor: default;
+	display: none;
+}
+
+.yew-luze span {
+  position: relative;
+  cursor: default;
+  font-size: 50px;
+  left: -150px;
+}
+.yew-luze span:hover {
+  color: lime;
+  font-size: 60px;
+}
