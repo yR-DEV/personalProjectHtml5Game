@@ -631,9 +631,11 @@ function Game() {
       this.background = new Background();
       this.background.init(0, 0);  //draw point is at x = 0 and y = 0;
       //need to initialize the Biker and enemy Objects now
+			var enemySpeed = 2;
       this.biker = new Biker();
 			this.playerScore = 0;
 			this.playerLevel = 1;
+			this.enemySpeed = 2;
 			// this.enemy1 = new Enemy1();
       //setting the biker to start at the bottom middle of the screen
       var bikerStartX = this.bikeCanvas.width / 2 - imgDir.biker.width;
@@ -655,7 +657,7 @@ function Game() {
 				height: this.mainCanvas.height
 			});
 			this.checkState = window.setInterval(function(){checkGameReadyState()}, 1000);
-			console.log(this.checkState);
+			// console.log(this.checkState);
 		}
 	};
 
@@ -663,15 +665,18 @@ function Game() {
 		var height = imgDir.enemy1.height;
 		var width = imgDir.enemy1.width;
 		//setting x and y and the spacer between each biker
-
+		var enemySpeed = 2;
 		level += 1;
+		if(level != 1) {
+			enemySpeed +=2;
+		}
 		var x = 100;
 		var y = -height;
 		var enemySpacer = y * 1.5;
 		//a loop to go through the pool of enemy child instances
 		//when counter % 6 = 0, instances will spawn on a new row
 		for(var i = 1; i <= 18; i++){
-			this.enemySpawnPool.get(x, y, 2);
+			this.enemySpawnPool.get(x, y, enemySpeed);
 			x += width + 20;
 			if (i % 6 == 0) {
 				x = 100;
@@ -691,6 +696,9 @@ function Game() {
 
 	this.restart = function() {
 		document.getElementById('yew-luze').style.display = "none";
+
+		location.reload();
+		this.start();
 	}
 
 	this.gameOver = function() {
@@ -700,7 +708,7 @@ function Game() {
 }
 
 function checkGameReadyState(){
-	if(game.checkState) {
+	if(game.checkState === 1) {
 		window.clearInterval(game.checkState);
 		game.start();
 	}
