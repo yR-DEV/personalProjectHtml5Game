@@ -22,3 +22,21 @@ canvas {
   cursor: default;
   font-size: 30px;
 }
+.level {
+  position: absolute;
+  top: 40px;
+  left: 20px;
+  color: red;
+  font-family: Helvetica;
+  cursor: default;
+  font-size: 30px;
+}
+span .level {
+  position: absolute;
+  top: 40px;
+  left: 20px;
+  color: red;
+  font-family: Helvetica;
+  cursor: default;
+  font-size: 30px;
+}

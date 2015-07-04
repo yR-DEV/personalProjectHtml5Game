@@ -568,6 +568,9 @@ function Enemy1() {
 			return false;
 		}	else {
 			game.playerScore += 5;
+			if(game.enemySpawnPool.getThePool().length === 0) {
+				game.playerLevel +=1;
+			}
 			return true;
 		}
   };
@@ -627,7 +630,7 @@ function Game() {
       //need to initialize the Biker and enemy Objects now
       this.biker = new Biker();
 			this.playerScore = 0;
-			var level = 0;
+			this.playerLevel = 0;
 			// this.enemy1 = new Enemy1();
       //setting the biker to start at the bottom middle of the screen
       var bikerStartX = this.bikeCanvas.width / 2 - imgDir.biker.width;
@@ -690,6 +693,7 @@ function Game() {
 //by a front end developer named Paul Irish and is what the above this.start calls on
 function animate() {
 	document.getElementById('score').innerHTML = game.playerScore;
+	document.getElementById('level').innerHTML = game.playerLevel;
 
   game.fourSquare.clear();
 	game.fourSquare.insert(game.biker);
@@ -701,6 +705,7 @@ function animate() {
 
 	if(game.enemySpawnPool.getThePool().length === 0) {
 		game.enemySpawnWave();
+		game.playerLevel += 1;
 	}
 
 	requestAnimFrame( animate );
