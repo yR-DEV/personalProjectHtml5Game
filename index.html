@@ -19,6 +19,15 @@
 			#ship {
 				z-index: 0;
 			}
+      .score {
+				position: absolute;
+				top: 5px;
+				left: 20px;
+				color: red;
+				font-family: Helvetica;
+				cursor: default;
+        font-size: 30px;
+			}
 		</style>
   </head>
   <body onload="init()">
@@ -29,6 +38,7 @@
     </canvas>
     <canvas id="bikeCanvas", height="600", width="800">
     </canvas>
+    <div class="score">YER SCORE:  <span id="score"></span></div>
     <script src="js/app.js" type="text/javascript"></script>
   </body>
 </html>

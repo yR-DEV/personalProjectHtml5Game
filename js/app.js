@@ -566,6 +566,7 @@ function Enemy1() {
 			}
 			return false;
 		}	else {
+			game.playerScore += 5;
 			return true;
 		}
   };
@@ -624,6 +625,7 @@ function Game() {
       this.background.init(0, 0);  //draw point is at x = 0 and y = 0;
       //need to initialize the Biker and enemy Objects now
       this.biker = new Biker();
+			this.playerScore = 0;
 			// this.enemy1 = new Enemy1();
       //setting the biker to start at the bottom middle of the screen
       var bikerStartX = this.bikeCanvas.width / 2 - imgDir.biker.width;
@@ -681,6 +683,8 @@ function Game() {
 //creating the animation loop, calling on the requestAnimationFrame from the API
 //by a front end developer named Paul Irish and is what the above this.start calls on
 function animate() {
+	document.getElementById('score').innerHTML = game.playerScore;
+
   game.fourSquare.clear();
 	game.fourSquare.insert(game.biker);
 	game.fourSquare.insert(game.biker.uLockPool.getThePool());
