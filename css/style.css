@@ -13,3 +13,12 @@ canvas {
 #bikeCanvas {
 	z-index: 0;
 }
+.score {
+  position: absolute;
+  top: 5px;
+  left: 20px;
+  color: red;
+  font-family: Helvetica;
+  cursor: default;
+  font-size: 30px;
+}

@@ -520,7 +520,7 @@ function Biker() {
 Biker.prototype = new Drawable();
 
 function Enemy1() {
-	var percentChanceToFire = 1;
+	var percentChanceToFire = .001;
 	var chance = 0;
 	this.collidingBool = false;
 	this.collidesWith = "uLock";
@@ -560,9 +560,9 @@ function Enemy1() {
 		if(!this.collidingBool) {
 			this.context.drawImage(imgDir.enemy1, this.x, this.y);
 			//giving the enemies achance to fire a weapon
-			var chance = Math.floor(Math.random() * 6);
+			var chance = Math.floor(Math.random() * 201);
 			// console.log(chance);
-			if(chance / 8 < percentChanceToFire) {
+			if(chance / 100 < percentChanceToFire) {
 				this.throw();
 			}
 			return false;
@@ -627,6 +627,7 @@ function Game() {
       //need to initialize the Biker and enemy Objects now
       this.biker = new Biker();
 			this.playerScore = 0;
+			var level = 0;
 			// this.enemy1 = new Enemy1();
       //setting the biker to start at the bottom middle of the screen
       var bikerStartX = this.bikeCanvas.width / 2 - imgDir.biker.width;
@@ -650,10 +651,12 @@ function Game() {
 		}
 		this.start();
 	};
-	this.enemySpawnWave = function() {
+	this.enemySpawnWave = function(level) {
 		var height = imgDir.enemy1.height;
 		var width = imgDir.enemy1.width;
 		//setting x and y and the spacer between each biker
+
+		level += 1;
 		var x = 100;
 		var y = -height;
 		var enemySpacer = y * 1.5;
@@ -664,7 +667,7 @@ function Game() {
 			x += width + 20;
 			if (i % 6 == 0) {
 				x = 100;
-				y += enemySpacer
+				y += enemySpacer;
 			}
 		}
 	}
