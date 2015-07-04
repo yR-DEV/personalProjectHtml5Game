@@ -654,9 +654,11 @@ function Game() {
 				width: this.mainCanvas.width,
 				height: this.mainCanvas.height
 			});
+			this.checkState = window.setInterval(function(){checkGameReadyState()}, 1000);
+			console.log(this.checkState);
 		}
-		this.start();
 	};
+
 	this.enemySpawnWave = function(level) {
 		var height = imgDir.enemy1.height;
 		var width = imgDir.enemy1.width;
@@ -686,10 +688,41 @@ function Game() {
     animate();
   };
 
+	this.restart = function() {
+		// console.log('restart function check');
+		document.getElementById('yew-luze').style.display = "none";
+		this.backgroundContext.clearRect(0, 0, this.backgroundCanvas.width, this.backgroundCanvas.length);
+		this.bikeContext.clearRect(0, 0, this.bikeCanvas.width, this.bikeCanvas.height);
+		this.mainContext.clearRect(0, 0, this.mainCanvas.width, this.mainCanvas.height);
+		this.fourSquare.clear();
+
+		this.background.init(0, 0);
+		// var bikerStartX = this.bikeCanvas.width / 2 - imgDir.biker.width;
+		// var bikerStartY = this.bikeCanvas.height / 4 * 4.25 - imgDir.biker.height * 2;
+		this.biker.init(bikerStartX, bikerStartY, imgDir.biker.width, imgDir.biker.height);
+
+
+		this.enemySpawnPool.init("enemy1");
+		this.enemySpawnWave();
+		this.enemyAmmoArrPool.init("enemyAmmo");
+
+		this.playerScore = 0;
+		this.playerLevel = 1;
+
+		this.start();
+	};
+
 	this.gameOver = function() {
 		document.getElementById('yew-luze').style.display = "block";
 		document.getElementById('score-and-level').style.display = "none";
-	}
+	};
+}
+
+function checkGameReadyState(){
+	if(game.checkState) {
+		window.clearInterval(game.checkState);
+		game.start();
+	}	
 }
 //this function, commented out right now, will be used to check to make sure
 //that all the audio files have loaded before starting the game
@@ -716,12 +749,13 @@ function animate() {
 		game.playerLevel += 1;
 	}
 
-	requestAnimFrame( animate );
-  game.background.draw();
-  game.biker.move();
-  game.biker.uLockPool.animate();
-	game.enemySpawnPool.animate();
-	game.enemyAmmoArrPool.animate();
+
+		requestAnimFrame( animate );
+	  game.background.draw();
+	  game.biker.move();
+	  game.biker.uLockPool.animate();
+		game.enemySpawnPool.animate();
+		game.enemyAmmoArrPool.animate();
 }
 
 function detectCollision() {
