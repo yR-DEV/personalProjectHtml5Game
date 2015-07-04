@@ -66,7 +66,7 @@ var imgDir = new function() {
   //setting the image source
   this.background.src = "img/road.png";
   this.biker.src = "img/car.png";
-  this.uLock.src = "img/bullets.png";
+  this.uLock.src = "img/lock.png";
 	this.enemy1.src = "img/enemy.png";
 	this.enemyAmmo.src = "img/enemyAmmo.png";
 };
