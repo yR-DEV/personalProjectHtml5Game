@@ -7,8 +7,9 @@
 var game = new Game();
 
 function init() {
-	if(game.init())
-		game.start();
+	// if(game.init())
+	// 	game.start();
+	game.init();
 }
 
 //creating an image object, this will house all of the images in the img folder
@@ -636,40 +637,37 @@ function Game() {
 			//the fn that does this was cleverly named ULockPool cuz im awesome
 			this.enemySpawnPool = new ThePools(30);
 			this.enemySpawnPool.init("enemy1");
-			var height = imgDir.enemy1.height;
-			var width = imgDir.enemy1.width;
-			//setting x and y and the spacer between each biker
-			var x = 100;
-			var y = -height;
-			var enemySpacer = y * 1.5;
-			//a loop to go through the pool of enemy child instances
-			//when counter % 6 = 0, instances will spawn on a new row
-			for(var i = 1; i <= 18; i++){
-				this.enemySpawnPool.get(x, y, 2);
-				x += width + 20;
-				if (i % 6 == 0) {
-					x = 100;
-					y += enemySpacer
-				}
-			}
-
-			//initializing a ULockPool instance for the enemy bullets
 			this.enemyAmmoArrPool = new ThePools(30);
 			this.enemyAmmoArrPool.init("enemyAmmo");
+			this.enemySpawnWave();
 
-			//starting FourSquare
 			this.fourSquare = new FourSquare({
 				x: 0,
 				y: 0,
 				width: this.mainCanvas.width,
 				height: this.mainCanvas.height
 			});
-		  //returns true because the biker was drawn
-      return true;
-    } else {
-      return false;
-    }
-  };
+		}
+		this.start();
+	};
+	this.enemySpawnWave = function() {
+		var height = imgDir.enemy1.height;
+		var width = imgDir.enemy1.width;
+		//setting x and y and the spacer between each biker
+		var x = 100;
+		var y = -height;
+		var enemySpacer = y * 1.5;
+		//a loop to go through the pool of enemy child instances
+		//when counter % 6 = 0, instances will spawn on a new row
+		for(var i = 1; i <= 18; i++){
+			this.enemySpawnPool.get(x, y, 2);
+			x += width + 20;
+			if (i % 6 == 0) {
+				x = 100;
+				y += enemySpacer
+			}
+		}
+	}
 
   //initializing the animation loop
   this.start = function() {
@@ -679,6 +677,11 @@ function Game() {
     animate();
   };
 }
+//this function, commented out right now, will be used to check to make sure
+//that all the audio files have loaded before starting the game
+// function checkReadyState() {
+// 	game.start();
+// }
 
 //creating the animation loop, calling on the requestAnimationFrame from the API
 //by a front end developer named Paul Irish and is what the above this.start calls on
@@ -692,6 +695,10 @@ function animate() {
 	game.fourSquare.insert(game.enemyAmmoArrPool.getThePool());
 
 	detectCollision();
+
+	if(game.enemySpawnPool.getThePool().length === 0) {
+		game.enemySpawnWave();
+	}
 
 	requestAnimFrame( animate );
   game.background.draw();
