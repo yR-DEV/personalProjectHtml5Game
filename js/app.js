@@ -448,11 +448,11 @@ function ThePools(maxLength) {
 //with the user input
 function Biker() {
   //setting default values, speeds, and pool size
-  this.speed = 4;
+  this.speed = 5;
   this.uLockPool = new ThePools(30);
   this.uLockPool.init("uLock");
   //setting the firing rate and the counter of bullets
-  var throwingRate = 15;
+  var throwingRate = 18;
   var counter = 0;
 	//collision setting
 	this.collidesWith = "enemyAmmo";
@@ -532,8 +532,8 @@ function Enemy1() {
 	this.spawn = function(x, y, theSpeed) {
 		this.x = x;
 		this.y = y;
-		this.speed = theSpeed;
-		this.speedX = 0;
+		this.speed = theSpeed ;
+		this.speedX = 1;
 		this.speedY = theSpeed;
 		this.alive = true;
 		this.leftEdgeDim = this.x - 90;
@@ -544,7 +544,7 @@ function Enemy1() {
 	this.draw = function() {
     this.context.clearRect(this.x-1, this.y, this.width+1, this.height);
     this.y += this.speedY;
-		this.x += this.speedX;
+		this.x += this.speedX	;
 		if(this.x <= this.leftEdgeDim) {
 			this.speedX = this.speed;
 		} else if (this.x >= this.rightEdgeDim + this.width) {
@@ -554,7 +554,7 @@ function Enemy1() {
 		} else if (this.y >= this.bottomEdgeDim) {
 			//once the enemies reach the bottom edge stop their speed along the y axis
 			//and reverse the X speed
-			this.speed = 1.0;
+			this.speed = 2.0;
 			this.speedY = 0;
 			this.y -= 5;
 			this.speedX = -this.speed;
@@ -572,7 +572,7 @@ function Enemy1() {
 		}	else {
 			game.playerScore += 5;
 			if(game.enemySpawnPool.getThePool().length === 0) {
-				game.playerLevel +=1;
+				game.playerLevel += 1
 			}
 			return true;
 		}
@@ -665,10 +665,10 @@ function Game() {
 		var height = imgDir.enemy1.height;
 		var width = imgDir.enemy1.width;
 		//setting x and y and the spacer between each biker
-		var enemySpeed = 2;
+		var enemySpeed = 4;
 		level += 1;
 		if(level != 1) {
-			enemySpeed +=2;
+			enemySpeed +=1;
 		}
 		var x = 100;
 		var y = -height;
